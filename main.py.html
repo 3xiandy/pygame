@@ -1,0 +1,164 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6897bb;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">pygame</span>
+<span class="s0">import </span><span class="s1">random</span>
+<span class="s0">import </span><span class="s1">math</span>
+
+<span class="s2"># intialize the pygame</span>
+<span class="s1">pygame.init()</span>
+
+<span class="s2"># creates the screen</span>
+<span class="s1">screen = pygame.display.set_mode((</span><span class="s3">1280</span><span class="s0">, </span><span class="s3">960</span><span class="s1">))</span>
+
+<span class="s2"># background</span>
+<span class="s1">background = pygame.image.load(</span><span class="s4">'background.jpg'</span><span class="s1">)</span>
+
+<span class="s2"># Title and Icon</span>
+<span class="s1">pygame.display.set_caption(</span><span class="s4">&quot;PC Wars(A level Project)&quot;</span><span class="s1">)</span>
+<span class="s1">icon = pygame.image.load(</span><span class="s4">'pythonicon.png'</span><span class="s1">)</span>
+<span class="s1">pygame.display.set_icon(icon)</span>
+
+<span class="s2"># player</span>
+<span class="s1">playerImg = pygame.image.load(</span><span class="s4">'robot.png'</span><span class="s1">)</span>
+<span class="s1">playerX = </span><span class="s3">640</span>
+<span class="s1">playerY = </span><span class="s3">850</span>
+<span class="s1">playerX_change = </span><span class="s3">0</span>
+
+<span class="s2"># enemy</span>
+<span class="s1">enemyImg = []</span>
+<span class="s1">enemyX = []</span>
+<span class="s1">enemyY = []</span>
+<span class="s1">enemyX_change = []</span>
+<span class="s1">enemyY_change = []</span>
+<span class="s1">num_of_enemies = </span><span class="s3">6</span>
+
+<span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(num_of_enemies):</span>
+    <span class="s1">enemyImg.append(pygame.image.load(</span><span class="s4">'virus.png'</span><span class="s1">))</span>
+    <span class="s1">enemyX.append(random.randint(</span><span class="s3">0</span><span class="s0">, </span><span class="s3">1217</span><span class="s1">))</span>
+    <span class="s1">enemyY.append(random.randint(</span><span class="s3">50</span><span class="s0">, </span><span class="s3">160</span><span class="s1">))</span>
+    <span class="s1">enemyX_change.append(</span><span class="s3">0.3</span><span class="s1">)</span>
+    <span class="s1">enemyY_change.append(</span><span class="s3">30</span><span class="s1">)</span>
+
+    <span class="s2"># bullet</span>
+    <span class="s1">bulletImg = pygame.image.load(</span><span class="s4">'bullet.png'</span><span class="s1">)</span>
+    <span class="s1">bulletX = </span><span class="s3">0</span>
+    <span class="s1">bulletY = </span><span class="s3">850</span>
+    <span class="s1">bulletX_change = </span><span class="s3">0</span>
+    <span class="s1">bulletY_change = </span><span class="s3">3</span>
+    <span class="s1">bullet_state = </span><span class="s4">&quot;ready&quot;</span>
+
+    <span class="s1">score = </span><span class="s3">0</span>
+
+
+<span class="s0">def </span><span class="s1">player(x</span><span class="s0">, </span><span class="s1">y):</span>
+    <span class="s1">screen.blit(playerImg</span><span class="s0">, </span><span class="s1">(playerX</span><span class="s0">, </span><span class="s1">playerY))</span>
+
+
+<span class="s0">def </span><span class="s1">enemy(x</span><span class="s0">, </span><span class="s1">y</span><span class="s0">, </span><span class="s1">i):</span>
+    <span class="s1">screen.blit(enemyImg[i]</span><span class="s0">, </span><span class="s1">(enemyX</span><span class="s0">, </span><span class="s1">enemyY))</span>
+
+
+<span class="s0">def </span><span class="s1">fire_bullet(x</span><span class="s0">, </span><span class="s1">y):</span>
+    <span class="s0">global </span><span class="s1">bullet_state</span>
+    <span class="s1">bullet_state = </span><span class="s4">&quot;fire&quot;</span>
+    <span class="s1">screen.blit(bulletImg</span><span class="s0">, </span><span class="s1">(x + </span><span class="s3">16</span><span class="s0">, </span><span class="s1">y + </span><span class="s3">10</span><span class="s1">))  </span><span class="s2"># so the bullet shoots at the right part of the robot</span>
+
+
+<span class="s2"># make sure collisions work</span>
+<span class="s0">def </span><span class="s1">collision(enemyX</span><span class="s0">, </span><span class="s1">enemyY</span><span class="s0">, </span><span class="s1">bulletX</span><span class="s0">, </span><span class="s1">bulletY):</span>
+    <span class="s1">distance = math.sqrt(math.pow(enemyX - bulletX</span><span class="s0">, </span><span class="s3">2</span><span class="s1">)) + (math.pow(enemyY - bulletY</span><span class="s0">, </span><span class="s3">2</span><span class="s1">))</span>
+    <span class="s0">if </span><span class="s1">distance &lt; </span><span class="s3">27</span><span class="s1">:</span>
+        <span class="s0">return True</span>
+    <span class="s0">else</span><span class="s1">:</span>
+        <span class="s0">return False</span>
+
+    <span class="s2"># Makes sure that the game loops</span>
+
+
+<span class="s1">running = </span><span class="s0">True</span>
+
+<span class="s0">while </span><span class="s1">running:</span>
+    <span class="s2"># implementing colour onto the screen</span>
+    <span class="s1">screen.fill((</span><span class="s3">0</span><span class="s0">, </span><span class="s3">0</span><span class="s0">, </span><span class="s3">0</span><span class="s1">))</span>
+
+    <span class="s2"># implementing background image</span>
+    <span class="s1">screen.blit(background</span><span class="s0">, </span><span class="s1">(</span><span class="s3">0</span><span class="s0">, </span><span class="s3">0</span><span class="s1">))</span>
+
+    <span class="s0">for </span><span class="s1">event </span><span class="s0">in </span><span class="s1">pygame.event.get():</span>
+        <span class="s0">if </span><span class="s1">event.type == pygame.QUIT:</span>
+            <span class="s1">running = </span><span class="s0">False</span>
+    <span class="s2"># if keystroke is pressed, check whether it is right or left</span>
+    <span class="s0">if </span><span class="s1">event.type == pygame.KEYDOWN:</span>
+        <span class="s0">if </span><span class="s1">event.key == pygame.K_LEFT:</span>
+            <span class="s1">playerX_change = -</span><span class="s3">0.4</span>
+        <span class="s0">if </span><span class="s1">event.key == pygame.K_RIGHT:</span>
+            <span class="s1">playerX_change = </span><span class="s3">0.4</span>
+        <span class="s0">if </span><span class="s1">event.key == pygame.K_UP:</span>
+            <span class="s0">if </span><span class="s1">bullet_state </span><span class="s0">is </span><span class="s4">&quot;ready&quot;</span><span class="s1">:</span>
+                <span class="s1">bulletX = playerX</span>
+                <span class="s1">fire_bullet(playerX</span><span class="s0">, </span><span class="s1">bulletY)</span>
+
+    <span class="s0">if </span><span class="s1">event.type == pygame.KEYUP:</span>
+        <span class="s0">if </span><span class="s1">event.key == pygame.K_LEFT </span><span class="s0">or </span><span class="s1">event.key == pygame.K_RIGHT:</span>
+            <span class="s1">playerX_change = </span><span class="s3">0.0</span>
+
+    <span class="s2"># x = x + value, shows the change in the pixels and therefore making the sprite move</span>
+    <span class="s1">playerX += playerX_change</span>
+
+    <span class="s2"># setting and checking boundaries for the robot, so it doesn't go out of bounds</span>
+    <span class="s0">if </span><span class="s1">playerX &lt;= </span><span class="s3">0</span><span class="s1">:</span>
+        <span class="s1">playerX = </span><span class="s3">0</span>
+    <span class="s0">elif </span><span class="s1">playerX &gt;= </span><span class="s3">1216</span><span class="s1">:</span>
+        <span class="s1">playerX = </span><span class="s3">1216</span>
+    <span class="s2"># checking for boundaries (enemy)</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(num_of_enemies):</span>
+        <span class="s1">enemyX[i] += enemyX_change[i]</span>
+        <span class="s0">if </span><span class="s1">enemyX[i] &lt;= </span><span class="s3">0</span><span class="s1">:</span>
+            <span class="s1">enemyX_change[i] = </span><span class="s3">0.2</span>
+            <span class="s1">enemyY[i] += enemyY_change[i]</span>
+        <span class="s0">elif </span><span class="s1">enemyX[i] &gt;= </span><span class="s3">1216</span><span class="s1">:</span>
+            <span class="s1">enemyX_change[i] = -</span><span class="s3">0.2</span>
+            <span class="s1">enemyY[i] += enemyY_change[i]</span>
+
+        <span class="s2"># Collision</span>
+        <span class="s1">collisions = collision(enemyX[i]</span><span class="s0">, </span><span class="s1">enemyY[i]</span><span class="s0">, </span><span class="s1">bulletX</span><span class="s0">, </span><span class="s1">bulletY)</span>
+        <span class="s0">if </span><span class="s1">collisions:</span>
+            <span class="s1">bulletY = </span><span class="s3">850</span>
+        <span class="s1">bullet_state = </span><span class="s4">&quot;ready&quot;</span>
+        <span class="s1">score += </span><span class="s3">1</span>
+        <span class="s1">print(score)</span>
+        <span class="s1">enemyX[i] = random.randint(</span><span class="s3">0</span><span class="s0">, </span><span class="s3">1216</span><span class="s1">)</span>
+        <span class="s1">enemyY[i] = random.randint(</span><span class="s3">50</span><span class="s0">, </span><span class="s3">160</span><span class="s1">)</span>
+
+    <span class="s1">enemy(enemyX[i]</span><span class="s0">, </span><span class="s1">enemyY[i]</span><span class="s0">, </span><span class="s1">i)</span>
+
+<span class="s2"># Bullet Movement</span>
+<span class="s0">if </span><span class="s1">bulletY &lt;= </span><span class="s3">0</span><span class="s1">:</span>
+    <span class="s1">bulletY = </span><span class="s3">850</span>
+    <span class="s1">bullet_state = </span><span class="s4">&quot;ready&quot;</span>
+<span class="s0">if </span><span class="s1">bullet_state </span><span class="s0">is </span><span class="s4">&quot;fire&quot;</span><span class="s1">:</span>
+    <span class="s1">fire_bullet(bulletX</span><span class="s0">, </span><span class="s1">bulletY)  </span><span class="s2"># to ensure bullet doesnt follow the robot</span>
+    <span class="s1">bulletY -= bulletY_change</span>
+
+
+<span class="s1">player(playerX</span><span class="s0">, </span><span class="s1">playerY)</span>
+<span class="s1">pygame.display.update()</span>
+</pre>
+</body>
+</html>
